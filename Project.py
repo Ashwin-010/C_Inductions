@@ -19,20 +19,12 @@ def addperiod():
         name = input("Enter name of teacher: ")
         subject = input("Enter subject thought: ")
         prds = int(input("Enter number of periods a week: "))
-        add =[]
-        total = []
-        for i in range(prds):
-            a = random.randint(1,5)
-            for row in r:
-                row = list(row)
-                if a != daykeys[row[0]]:
-                    total.append(row)
-                elif a == daykeys[row[0]]:
-                    l = row
-                    b = random.randint(1,9)
-                    l[b]=[name,subject]
-                    total.append(l)
+        y = list(r)
+    for i in range(prds):
+        a = random.randint(0,4)
+        b = random.randint(1, 8)
+        y[a][b] = [name,subject]
     with open('timetable.csv','w',newline='') as f:
         w = csv.writer(f)
-        w.writerows(total)
+        w.writerows(y)
 addperiod()
