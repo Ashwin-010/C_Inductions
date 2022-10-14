@@ -14,15 +14,44 @@ def info():
             break
     f.close()
 #info()
-def lcreation():
+    
+def teachertt():
+    f = open('data.csv','r',newline = '')
+    g = open('teacher.csv','w+',newline = '')
+    r = csv.reader(f)
+    w = csv.writer(g)
+    l1 = list(r)
+    d1 = {}
+    for i in range(1,len(l1)):
+        d1[l1[i][1]] = [['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']]
+    j = 0
+    for i in range(1,len(l1)):
+        k = 0
+        while k < int(l1[i][2]):
+            if j > 4:
+                j = 0
+            d1[l1[i][1]][j].append(l1[i][3])
+            k += 1
+            j += 1
+    for i in d1:
+        d1[i].insert(0,[i])
+    for i in d1:
+        w.writerows(d1[i])
+        w.writerow([])
+    print(d1)
+        
+
+teachertt()
+    
+'''def lcreation():
     f = open('data.csv','r')
     g = open('timetable.csv','w+',newline = '')
     w = csv.writer(g)
     w.writerow(['Day','1','2','3','4','5','6','7','8','9'])
     r = csv.reader(f)
     l1 = list(r)
-    d9 = {'9E':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']],'9F':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']],'9G':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']],'9H':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']],'9J':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']]}
-    d10 = {'10E':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']],'10F':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']],'10G':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']],'10H':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']],'10J':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']]}
+    d9 = {'9F':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']]}
+    d10 = {'10E':[['Monday'],['Tuesday'],['Wednesday'],['Thursday'],['Friday']]}
     j = 0
     for i in range(1,len(l1)):
         k = 0
@@ -49,8 +78,6 @@ def lcreation():
     print(d9)
     print(d10)
     f.close()
-    g.close()
-            
+    g.close()       
 lcreation()
-    
-            
+'''          
