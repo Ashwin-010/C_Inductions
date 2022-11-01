@@ -1,8 +1,18 @@
 import csv
 
-def userinput():
-    food = input("What would you like to order:")
-    return food
+def userinput():#Todo Add an order view option(More efficient to do this maybe after implementation of GUI)
+    cart = []
+    while True:
+        food = input("What would you like to order:")
+        cart.append(food)
+        yorn = input("Would you like to add another item to your cart?(Y/N):")
+        if yorn.lower() == "n":
+            break
+    print(cart)
+    f = open('Order.csv','w')
+    w = csv.writer(f)
+    w.writerow(cart)
+    return cart
 
 def getdata():#Function to get the data of the restaurants from a csv file
     f = open('data.csv','r')
@@ -60,8 +70,9 @@ def lowestprice(userfoodinrests):#Find the lowest price from the list created by
     else:
         print(userfood, "is available at the best price at", lowestprice[0][0],",","Cost =", lowestprice[0][2])
 
-userfood = userinput()
+userfoods = userinput()
 restdict = getdata()
-userfoodinrests = finditem(userfood)
-lowestprice(userfoodinrests)
+for userfood in userfoods:#todo Have to compare total menu price for every restaurant not every food(Change that)
+    userfoodinrests = finditem(userfood)
+    lowestprice(userfoodinrests)
 
