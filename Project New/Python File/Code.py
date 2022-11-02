@@ -43,8 +43,6 @@ def dispavg(averrest,restdict):#Todo Formatting of display(Look up lab fibonacci
 
 restdict = getdata()
 averrest = cheaprest(restdict)
-dispavg(averrest,restdict)
-#Todo Accept User input add to cart and then provide total price and an option to view the order
 
 def addtocart(restdict):#function to add items to cart
     cart = {}
