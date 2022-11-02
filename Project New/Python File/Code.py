@@ -66,7 +66,8 @@ def addtocart(restdict):#function to add items to cart
     return cart#returning dictionary containing item name,restaurant ordered from,price and quantity
 
 
-def viewcart(cart):#function to view items in cart
+def viewcart(cart):
+    import math
     print("S.No\tItem\tRestaurant\tQuantity\tprice")
     total = 0
     serialno = 1
@@ -74,7 +75,10 @@ def viewcart(cart):#function to view items in cart
         print(serialno,".\t",i,"\t",cart[i][0],"\t",cart[i][-1],"\t",(cart[i][1])*2)
         total+=((cart[i][1])*2)
         serialno+=1
-    print("Total = ",total)
+    print("Total = Rs.",total)
     print("GST = 18%")
-    print("Grand Total = ",total*0.18)
+    print("Grand Total = Rs.",math.ceil(total+total*0.18),)
 viewcart(addtocart(restdict))
+
+#todo allign tables
+#todo add serial numbers for restaurant so that we dont have to type in full name everytime
