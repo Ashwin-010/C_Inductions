@@ -37,12 +37,16 @@ def dispavg(averrest,restdict):#Todo Formatting of display(Look up lab fibonacci
         print(averrest[i][0],"\t\t\t\t\t",averrest[i][1])
     restname = input("Enter which restaurant you would like to choose:")#Asks the user to choose a restaurant
     menu = restdict[restname]
-    print("Dishes\t\t","Price")
+    print("    Dishes\t\t\t","Price")
+    n=1
     for i in menu:#Prints the menu of the restaurant chosen by the user
-        print(i[0],"\t\t",i[1])
-
+        print(n,'.',i[0],"\t\t",i[1])
+        n+=1
+    return restname
 restdict = getdata()
+print(restdict)
 averrest = cheaprest(restdict)
+#Todo Accept User input add to cart and then provide total price and an option to view the order
 
 def addtocart(restdict):#function to add items to cart
     cart = {}
