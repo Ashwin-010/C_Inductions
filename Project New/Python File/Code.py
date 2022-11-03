@@ -16,7 +16,6 @@ def getdata():#Function to get the data of the restaurants from a csv file
             l1.append(i)
     return d1
 
-
 def cheaprest(restdict):#function to find cheapest priced restaurant
     lowprice = ('a',1000000000000000000000000000000000000000)
     averres = []#List containing the prices of a particular restaurant
@@ -32,17 +31,20 @@ def cheaprest(restdict):#function to find cheapest priced restaurant
     return averres
 
 def dispavg(averrest,restdict):#Todo Formatting of display(Look up lab fibonacci program(sir's solution))
-    print("Restaurant Name\t\t\t\t\t","Average Price")#Print every restaurant name and the restaurant's average price
-    for i in range(len(averrest)):
-        print(averrest[i][0],"\t\t\t\t\t",averrest[i][1])
-    restname = input("Enter which restaurant you would like to choose:")#Asks the user to choose a restaurant
-    menu = restdict[restname]
-    print("    Dishes\t\t\t","Price")
+    print("Restaurant Name\t\t\t\t\t","Average Price\t\t\t\t\t","Number")
+    print("Choose a restaurant using the numbers to order from:")
+    restlist = []#List containing restaurant names
+    for i in range(len(averrest)):#Print every restaurant name and the restaurant's average price
+        print(averrest[i][0],"\t\t\t\t\t",averrest[i][1],"\t\t\t\t\t",i+1)
+        restlist.append(averrest[i][0])
+    restnum = int(input("Enter which restaurant you would like to choose:"))#Asks the user to choose a restaurant
+    menu = restdict[restlist[restnum-1]]#Get restaurant name from restlist and then get its menu from restdict
+    print("Dishes\t\t\t","Price")
     n=1
     for i in menu:#Prints the menu of the restaurant chosen by the user
         print(n,'.',i[0],"\t\t",i[1])
         n+=1
-    return restname
+    return restlist[restnum-1]
 restdict = getdata()
 print(restdict)
 averrest = cheaprest(restdict)
@@ -50,11 +52,18 @@ averrest = cheaprest(restdict)
 
 def addtocart(restdict):#function to add items to cart
     cart = {}
+    i = 0
     while True:
-        restchoice = dispavg(averrest, restdict)#restaurant from which they would like item
-        foodchoice = int(input("Enter Item Number of food item you would like to add: "))#indec of item they choose
-        quantity = int(input("Enter quantity you would like to order: "))#quantity of item
-        menu = restdict[restchoice]         #next 6 lines are for getting item price
+        if i ==0 :
+            restchoice = dispavg(averrest, restdict)#restaurant from which they would like item
+            foodchoice = int(input("Enter Item Number of food item you would like to add: "))#indec of item they choose
+            quantity = int(input("Enter quantity you would like to order: "))#quantity of item
+            menu = restdict[restchoice]         #next 6 lines are for getting item price
+            i += 1
+        else:
+            foodchoice = int( input("Enter Item Number of food item you would like to add: "))  # indec of item they choose
+            quantity = int(input("Enter quantity you would like to order: "))  # quantity of item
+            menu = restdict[restchoice]  # next 6 lines are for getting item price
         for items in menu:
             if items[0] == restdict[restchoice][foodchoice-1][0]:
                 itemprice = int(items[-1])
