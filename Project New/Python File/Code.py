@@ -1,5 +1,8 @@
 import csv
-def getdata():#Function to get the data of the restaurants from a csv file
+import ast
+from prettytable import PrettyTable
+def getdata():#Function to get data from the csv file from
+    # on to get the data of the restaurants from a csv file
     f = open('data.csv','r')
     r = csv.reader(f)
     data = list(r)
@@ -31,30 +34,30 @@ def cheaprest(restdict):#function to find cheapest priced restaurant
     return averres
 
 def dispavg(averrest,restdict):#Todo Formatting of display(Look up lab fibonacci program(sir's solution))
-    print("Restaurant Name\t\t\t\t\t","Average Price\t\t\t\t\t","Number")
+    myTable = PrettyTable(["Restaurant Name","Average Price","Number"])
     print("Choose a restaurant using the numbers to order from:")
     restlist = []#List containing restaurant names
     for i in range(len(averrest)):#Print every restaurant name and the restaurant's average price
-        print(averrest[i][0],"\t\t\t\t\t",averrest[i][1],"\t\t\t\t\t",i+1)
+        myTable.add_row([averrest[i][0],averrest[i][1],i+1])
         restlist.append(averrest[i][0])
+    print(myTable)
     restnum = int(input("Enter which restaurant you would like to choose:"))#Asks the user to choose a restaurant
     menu = restdict[restlist[restnum-1]]#Get restaurant name from restlist and then get its menu from restdict
-    print("Dishes\t\t\t","Price")
+    myTable2 =  PrettyTable(["Number","Dishes","Price"])
     n=1
     for i in menu:#Prints the menu of the restaurant chosen by the user
-        print(n,'.',i[0],"\t\t",i[1])
+        myTable2.add_row([n,i[0],i[1]])
         n+=1
+    print(myTable2)
     return restlist[restnum-1]
-restdict = getdata()
-print(restdict)
-averrest = cheaprest(restdict)
-#Todo Accept User input add to cart and then provide total price and an option to view the order
+
 
 def addtocart(restdict):#function to add items to cart
     cart = {}
     i = 0
     while True:
         if i ==0 :
+            global restchoice
             restchoice = dispavg(averrest, restdict)#restaurant from which they would like item
             foodchoice = int(input("Enter Item Number of food item you would like to add: "))#indec of item they choose
             quantity = int(input("Enter quantity you would like to order: "))#quantity of item
@@ -79,17 +82,105 @@ def addtocart(restdict):#function to add items to cart
 
 def viewcart(cart):
     import math
-    print("S.No\tItem\tRestaurant\tQuantity\tprice")
+    bill = PrettyTable(["S.No", "Item","Quantity","Price"])
     total = 0
     serialno = 1
     for i in cart:
-        print(serialno,".\t",i,"\t",cart[i][0],"\t",cart[i][-1],"\t",(cart[i][1])*2)
-        total+=((cart[i][1])*2)
+        bill.add_row([serialno, i, cart[i][-1], (cart[i][1]*cart[i][-1])])
+        total+=((cart[i][1])*(cart[i][-1]))
         serialno+=1
+    print(bill)
     print("Total = Rs.",total)
     print("GST = 18%")
     print("Grand Total = Rs.",math.ceil(total+total*0.18),)
-viewcart(addtocart(restdict))
 
-#todo allign tables
-#todo add serial numbers for restaurant so that we dont have to type in full name everytime
+def ratingscreate():#Creates a file called ratefile which contains empty ratings in the format [restname,[ratings]]
+    ratingslist = []
+    for i in restdict:
+        ratelisele = [i, []]
+        ratingslist.append(ratelisele)
+        ratefile = open("rating.csv", "w")
+        w = csv.writer(ratefile)
+    for i in ratingslist:
+        w.writerow(i)
+    ratefile.close()
+
+def ratingavgcreate():#To create a file which contains the average of price of every restaurant in the format [restname,ratingavg]
+    ratingavglist = []
+    for i in restdict:
+        ratelisele = [i, []]
+        ratingavglist.append(ratelisele)
+        rateavgfile = open("rateavg.csv", "w")
+        w = csv.writer(rateavgfile)
+    for i in ratingavglist:
+        w.writerow(i)
+    rateavgfile.close()
+
+def rating():#Accepts rating from the user and adds it to teh file
+    l1 = list(cart.values())#List containing every instance of the restaurant name
+    restname = l1[0][0]#Getting the restaurant name from the list
+    print("Thank You for making a purchase from",restname)
+    yorn = input("Would you like to add a rating for the following restaurant(Y/N)?")
+    if yorn.lower() == "y":
+        rating = float(input("Enter your rating for the following restaurant:"))
+    ratefile = open("rating.csv","r")#Opening file containing empty rates/old rates in the form [restname,[ratings]]
+    r = csv.reader(ratefile)
+    ratings = list(r)
+    ratefile.close()
+    for i in ratings:#1st Loop:To make every string in the format of list to list(cannot use str)
+        if i != []:
+            i[1] = ast.literal_eval(i[1])
+    for i in ratings:#2nd Loop:To append the rating to the list of ratings present already(nothing or old ratings)
+        if i != []:
+            if i[0] == restname:
+                i[1].append(rating)
+    ratefile = open("rating.csv", "w")
+    w1 = csv.writer(ratefile)
+    for i in ratings:#3rd Loop: To write the list with the new rating to the file
+        if i != []:
+            w1.writerow(i)
+    ratefile.close()
+
+def ratingsavg():
+    ratefile = open("rating.csv", "r")
+    allrates = csv.reader(ratefile)
+    allrates = list(allrates)
+    ratefile.close()#Opened ratefile to get the individual ratings of the restaurants(NOTE:Not everage)
+    rateavgfile = open("rateavg.csv", "r")#Opening rate avg file to get the blank avg format created by the fn ratingavgcreate()
+    r = csv.reader(rateavgfile)
+    ratings = list(r)
+    ratefile.close()
+    rateavgfile = open("rateavg.csv", "w")
+    w2 = csv.writer(rateavgfile)
+    for i in allrates:#To convert string in the form of list to list to calculate average
+        if i != []:
+            i[1] = ast.literal_eval(i[1])
+    for i in ratings:#To convert string in the form of list to list to add value(Maybe not needed?)
+        if i != []:
+            i[1] = ast.literal_eval(i[1])
+    for i in allrates:#Loop to write the values of the average rates to the file rateavg
+        if i != []:
+            try:#Try and except incase the sum is zero(ie:there are no ratings)
+                rateavg = (sum(i[1])) / (len(i[1]))
+                w2.writerow([i[0], rateavg])
+            except:
+                w2.writerow([i[0], 0])
+
+restdict = getdata()#Function to get data from
+averrest = cheaprest(restdict)#Returns the average price of each restaurant
+cart = addtocart(restdict)#Gives the cart of the user
+viewcart(cart)#Basically gives the bill of the user
+ratefile = open("rating.csv", "r")
+ratelist = csv.reader(ratefile)
+ratelist = list(ratelist)
+if ratelist == []:#To prevent it from clearing the rate file everytime the program is run so that the ratings get saved
+    ratingscreate()
+rating()#To add rating given by the user
+ratingavgcreate()#To create a blank average rating of every rating provided in a file
+ratingsavg()#Creates a file containing thethe average rating of every restaurant
+
+#todo Look at the error which pops up in the first loop every time after file opens
+#todo Create an algorithm for average order time
+#todo Sort the restaurant table
+
+
