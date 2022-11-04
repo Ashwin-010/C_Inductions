@@ -1,12 +1,23 @@
 import csv
 import ast
 from prettytable import PrettyTable
+from decimal import *
 def getdata():#Function to get data from the csv file from
     # on to get the data of the restaurants from a csv file
     f = open('data.csv','r')
     r = csv.reader(f)
     data = list(r)
     d1 = {}
+    global d2
+    d2 = {}
+    f.close()
+    f = open("rateavg.csv","r")
+    rateavg = csv.reader(f)
+    rateavg = list(rateavg)
+    for i in rateavg:
+        if i != []:
+            avgrate = Decimal(i[1])
+            d2[i[0]] = round(avgrate,1)
     for i in data:#A loop to remove the newline character of a csv file which is produced when we directly write to it(Empty list is recieved when we read)
         if i == []:
             data.remove(i)
@@ -34,11 +45,11 @@ def cheaprest(restdict):#function to find cheapest priced restaurant
     return averres
 
 def dispavg(averrest,restdict):#Todo Formatting of display(Look up lab fibonacci program(sir's solution))
-    myTable = PrettyTable(["Restaurant Name","Average Price","Number"])
+    myTable = PrettyTable(["Restaurant Name","Average Price","Rating","Number"])
     print("Choose a restaurant using the numbers to order from:")
     restlist = []#List containing restaurant names
     for i in range(len(averrest)):#Print every restaurant name and the restaurant's average price
-        myTable.add_row([averrest[i][0],averrest[i][1],i+1])
+        myTable.add_row([averrest[i][0],averrest[i][1],d2[averrest[i][0]],i+1])
         restlist.append(averrest[i][0])
     print(myTable)
     restnum = int(input("Enter which restaurant you would like to choose:"))#Asks the user to choose a restaurant
