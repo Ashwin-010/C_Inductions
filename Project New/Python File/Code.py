@@ -45,13 +45,25 @@ def cheaprest(restdict):#function to find cheapest priced restaurant
     return averres
 
 def dispavg(averrest,restdict):#Todo Formatting of display(Look up lab fibonacci program(sir's solution))
-    myTable = PrettyTable(["Restaurant Name","Average Price","Rating","Number"])
+    myTable = PrettyTable(["Number","Restaurant Name","Average Price","Rating",])
     print("Choose a restaurant using the numbers to order from:")
     restlist = []#List containing restaurant names
     for i in range(len(averrest)):#Print every restaurant name and the restaurant's average price
-        myTable.add_row([averrest[i][0],averrest[i][1],d2[averrest[i][0]],i+1])
+        myTable.add_row([i+1,averrest[i][0],averrest[i][1],d2[averrest[i][0]],])
         restlist.append(averrest[i][0])
     print(myTable)
+    usersort = input("Would you like to sort this table(Y/N):")
+    if usersort == "y":
+        typesort = int(input('''Sort by(Enter Number):
+        1. Restaurant Name
+        2. Average Price
+        3. Rating'''''))
+    if typesort == 1:
+        print(myTable.get_string(sortby="Restaurant Name"))
+    elif typesort == 2:
+        print(myTable.get_string(sortby="Average Price"))
+    elif typesort == 3:
+        print(myTable.get_string(sortby="Rating"))
     restnum = int(input("Enter which restaurant you would like to choose:"))#Asks the user to choose a restaurant
     menu = restdict[restlist[restnum-1]]#Get restaurant name from restlist and then get its menu from restdict
     myTable2 =  PrettyTable(["Number","Dishes","Price"])
@@ -190,8 +202,7 @@ rating()#To add rating given by the user
 ratingavgcreate()#To create a blank average rating of every rating provided in a file
 ratingsavg()#Creates a file containing thethe average rating of every restaurant
 
-#todo Look at the error which pops up in the first loop every time after file opens
 #todo Create an algorithm for average order time
-#todo Sort the restaurant table
+
 
 
