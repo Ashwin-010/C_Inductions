@@ -17,7 +17,8 @@ def getdata():#Function to get data from the csv file from
     for i in rateavg:
         if i != []:
             avgrate = Decimal(i[1])
-            d2[i[0]] = round(avgrate,1)
+            roundavg = round(avgrate,1)
+            d2[i[0]] = [roundavg,i[-1]]
     for i in data:#A loop to remove the newline character of a csv file which is produced when we directly write to it(Empty list is recieved when we read)
         if i == []:
             data.remove(i)
@@ -45,12 +46,12 @@ def cheaprest(restdict):#function to find cheapest priced restaurant
     return averres
 
 def dispavg(averrest,restdict,locdata):
-    myTable = PrettyTable(["Number","Restaurant Name","Average Price","Rating","Location"])
+    myTable = PrettyTable(["Number","Restaurant Name","Average Price","Rating","Number of Ratings","Location"])
     print("Choose a restaurant using the numbers to order from:")
     locations = list(locdata.keys())
     restlist = []#List containing restaurant names
     for i in range(len(averrest)):#Print every restaurant name and the restaurant's average price
-            myTable.add_row([i+1,averrest[i][0],averrest[i][1],d2[averrest[i][0]],locdata[locations[i]]])
+            myTable.add_row([i+1,averrest[i][0],averrest[i][1],d2[averrest[i][0]][0],d2[averrest[i][0]][1],locdata[locations[i]]])
             restlist.append(averrest[i][0])
     print(myTable)
     usersort = input("Would you like to sort this table(Y/N):")
@@ -59,7 +60,7 @@ def dispavg(averrest,restdict,locdata):
         1. Restaurant Name
         2. Average Price
         3. Rating
-        4.Location'''''))
+        4.Location:'''''))
         if typesort == 1:
             print(myTable.get_string(sortby="Restaurant Name"))
         elif typesort == 2:
@@ -192,7 +193,7 @@ def ratingsavg():
         if i != []:
             try:#Try and except incase the sum is zero(ie:there are no ratings)
                 rateavg = (sum(i[1])) / (len(i[1]))
-                w2.writerow([i[0], rateavg])
+                w2.writerow([i[0], rateavg,len(i[1])])
             except:
                 w2.writerow([i[0],0])
 
@@ -220,7 +221,6 @@ ratingavgcreate()#To create a blank average rating of every rating provided in a
 ratingsavg()#Creates a file containing thethe average rating of every restaurant
 
 #todo Create an algorithm for average order time
-
 
 
 
