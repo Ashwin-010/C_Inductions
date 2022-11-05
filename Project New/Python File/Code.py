@@ -101,7 +101,7 @@ def addtocart(restdict):#function to add items to cart
             menu = restdict[restchoice]
             while True:
                 foodchoice = int(input("Enter Item Number of food item you would like to add: "))#indec of item they choose
-                if foodchoice>0 and foodchoice<len(menu):
+                if foodchoice>0 and foodchoice<=len(menu):
                     break
                 else:
                     print("Enter Valid Food Item Number!")
