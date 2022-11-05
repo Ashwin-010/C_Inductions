@@ -46,12 +46,13 @@ def cheaprest(restdict):#function to find cheapest priced restaurant
     return averres
 
 def dispavg(averrest,restdict,locdata):
-    myTable = PrettyTable(["Number","Restaurant Name","Average Price","Rating","Number of Ratings","Location"])
+    from math import ceil
+    myTable = PrettyTable(["Number","Restaurant Name","Average Price","Rating","Location"])
     print("Choose a restaurant using the numbers to order from:")
     locations = list(locdata.keys())
     restlist = []#List containing restaurant names
     for i in range(len(averrest)):#Print every restaurant name and the restaurant's average price
-            myTable.add_row([i+1,averrest[i][0],averrest[i][1],d2[averrest[i][0]][0],d2[averrest[i][0]][1],locdata[locations[i]]])
+            myTable.add_row([i+1,averrest[i][0],averrest[i][1],d2["'"+averrest[i][0]+"'"][-1],locdata[locations[i]]])
             restlist.append(averrest[i][0])
     print(myTable)
     usersort = input("Would you like to sort this table(Y/N):")
@@ -69,8 +70,18 @@ def dispavg(averrest,restdict,locdata):
             print(myTable.get_string(sortby="Rating"))
         elif typesort == 4:
             print(myTable.get_string(sortby="Location"))
-    restnum = int(input("Enter which restaurant you would like to choose:"))#Asks the user to choose a restaurant
-    menu = restdict[restlist[restnum-1]]#Get restaurant name from restlist and then get its menu from restdict
+    while True:
+        try:
+            restnum = int(input("Enter which restaurant you would like to choose:"))  # Asks the user to choose a restaurant
+        except:
+            print("Enter Valid Restaurant Number!")
+            continue
+        if (restnum > 0 and restnum < len(restlist)) and type(restnum) == int:
+            menu = restdict[
+                restlist[restnum - 1]]  # Get restaurant name from restlist and then get its menu from restdict
+            break
+        else:
+            print("Enter Valid Restaurant Number!")
     myTable2 =  PrettyTable(["Number","Dishes","Price"])
     n=1
     for i in menu:#Prints the menu of the restaurant chosen by the user
@@ -87,9 +98,19 @@ def addtocart(restdict):#function to add items to cart
         if i ==0 :
             global restchoice
             restchoice = dispavg(averrest,restdict,getrestloc())#restaurant from which they would like item
-            foodchoice = int(input("Enter Item Number of food item you would like to add: "))#indec of item they choose
-            quantity = int(input("Enter quantity you would like to order: "))#quantity of item
-            menu = restdict[restchoice]         #next 6 lines are for getting item price
+            menu = restdict[restchoice]
+            while True:
+                foodchoice = int(input("Enter Item Number of food item you would like to add: "))#indec of item they choose
+                if foodchoice>0 and foodchoice<len(menu):
+                    break
+                else:
+                    print("Enter Valid Food Item Number!")
+            while True:
+                quantity = int(input("Enter quantity you would like to order: "))#quantity of item
+                if quantity>0:
+                    break
+                else:
+                    print("Enter a Valid Amount!")
             i += 1
         else:
             foodchoice = int( input("Enter Item Number of food item you would like to add: "))  # indec of item they choose
@@ -100,8 +121,14 @@ def addtocart(restdict):#function to add items to cart
                 itemprice = int(items[-1])
                 price = itemprice
         for i in restdict:#adding item to cart
-            if i==restchoice:
-                cart[restdict[i][foodchoice-1][0]]= (restchoice,price,quantity)
+            for j in range(len(restdict[i])):
+                if i==restchoice and restdict[i][j][0] not in list(cart.keys()):
+                    cart[restdict[i][foodchoice-1][0]]= (restchoice,price,quantity)
+                    break
+                elif i==restchoice and restdict[i][j][0] in list(cart.keys()):
+                    quan = cart[restdict[i][foodchoice-1][0]][-1]+quantity
+                    cart[restdict[i][foodchoice - 1][0]] = (restchoice,price,quan)
+                    break
         yorn = input("Would you like to add another item(y/n)? ")
         if yorn.lower()=='n':
             break
@@ -110,6 +137,7 @@ def addtocart(restdict):#function to add items to cart
 
 def viewcart(cart):
     from math import ceil
+    print(cart)
     bill = PrettyTable(["S.No", "Item","Quantity","Price"])
     total = 0
     serialno = 1
@@ -133,6 +161,16 @@ def ratingscreate():#Creates a file called ratefile which contains empty ratings
         w.writerow(i)
     ratefile.close()
 
+def ratingno():
+    with open("rating.csv") as f:
+        r = csv.reader(f)
+        l=list(r)
+        print(l)
+        no_ratings = []
+        for i in l:
+            no_ratings.append(i[-1])
+    return no_ratings
+
 def ratingavgcreate():#To create a file which contains the average of price of every restaurant in the format [restname,ratingavg]
     ratingavglist = []
     for i in restdict:
@@ -149,28 +187,36 @@ def rating():#Accepts rating from the user and adds it to teh file
     restname = l1[0][0]#Getting the restaurant name from the list
     print("Thank You for making a purchase from",restname)
     yorn = input("Would you like to add a rating for the following restaurant(Y/N)?")
-    if yorn.lower() == "y":
-        rating = float(input("Enter your rating for the following restaurant:"))
-        print("Your Feedback has been recorded!")
-        ratefile = open("rating.csv","r")#Opening file containing empty rates/old rates in the form [restname,[ratings]]
-        r = csv.reader(ratefile)
-        ratings = list(r)
-        ratefile.close()
-        for i in ratings:#1st Loop:To make every string in the format of list to list(cannot use str)
-            if i != []:
-                i[1] = ast.literal_eval(i[1])
-        for i in ratings:#2nd Loop:To append the rating to the list of ratings present already(nothing or old ratings)
-            if i != []:
-                if i[0] == restname:
-                    i[1].append(rating)
-        ratefile = open("rating.csv", "w")
-        w1 = csv.writer(ratefile)
-        for i in ratings:#3rd Loop: To write the list with the new rating to the file
-            if i != []:
-                w1.writerow(i)
-        ratefile.close()
-    else:
-        print("Have a good day!")
+    while True:
+        if yorn.lower() == "y":
+            rating = float(input("Enter your rating for the following restaurant(_/5):"))
+            if rating >=0 and rating<=5:
+                print("Your Feedback has been recorded!")
+                ratefile = open("rating.csv","r")#Opening file containing empty rates/old rates in the form [restname,[ratings]]
+                r = csv.reader(ratefile)
+                ratings = list(r)
+                ratefile.close()
+                for i in ratings:#1st Loop:To make every string in the format of list to list(cannot use str)
+                    if i != []:
+                        i[1] = ast.literal_eval(i[1])
+                for i in ratings:#2nd Loop:To append the rating to the list of ratings present already(nothing or old ratings)
+                    if i != []:
+                        if i[0] == restname:
+                            i[1].append(rating)
+                            i.append((i[-1]+1))
+                ratefile = open("rating.csv", "w")
+                w1 = csv.writer(ratefile)
+                for i in ratings:#3rd Loop: To write the list with the new rating to the file
+                    if i != []:
+                        w1.writerow(i)
+                ratefile.close()
+                break
+            else:
+                print("Please Enter Valid Rating!")
+                continue
+        else:
+            print("Enjoy Eating!")
+            break
 
 def ratingsavg():
     ratefile = open("rating.csv", "r")
@@ -206,7 +252,6 @@ def getrestloc():
         restlocdata[(i[0])]=i[-1]
     return restlocdata
 
-
 restdict = getdata()#Function to get data from
 averrest = cheaprest(restdict)#Returns the average price of each restaurant
 cart = addtocart(restdict)#Gives the cart of the user
@@ -221,8 +266,3 @@ ratingavgcreate()#To create a blank average rating of every rating provided in a
 ratingsavg()#Creates a file containing thethe average rating of every restaurant
 
 #todo Create an algorithm for average order time
-
-
-
-
-
