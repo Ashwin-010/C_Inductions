@@ -52,7 +52,7 @@ def dispavg(averrest,restdict,locdata):
     locations = list(locdata.keys())
     restlist = []#List containing restaurant names
     for i in range(len(averrest)):#Print every restaurant name and the restaurant's average price
-            myTable.add_row([i+1,averrest[i][0],averrest[i][1],d2["'"+averrest[i][0]+"'"][-1],locdata[locations[i]]])
+            myTable.add_row([i+1,averrest[i][0],averrest[i][1],d2[averrest[i][0]][-1],locdata[locations[i]]])
             restlist.append(averrest[i][0])
     print(myTable)
     usersort = input("Would you like to sort this table(Y/N):")
@@ -203,7 +203,6 @@ def rating():#Accepts rating from the user and adds it to teh file
                     if i != []:
                         if i[0] == restname:
                             i[1].append(rating)
-                            i.append((i[-1]+1))
                 ratefile = open("rating.csv", "w")
                 w1 = csv.writer(ratefile)
                 for i in ratings:#3rd Loop: To write the list with the new rating to the file
