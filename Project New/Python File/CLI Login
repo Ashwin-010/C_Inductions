@@ -1,0 +1,107 @@
+def entersite():
+    import pickle
+    print('''Welcome to Fast Eats!
+    1.Sign up
+    2.Login
+    3.Exit''')
+    choice = int(input("What would you like to do: "))
+    if choice == 1:
+        signup()
+    elif choice == 2:
+        login()
+    elif choice ==3:
+        quit()
+
+
+def signup():
+    import pickle
+    f = open('UserData.dat','ab')
+    while True:
+        phoneno = input("Enter Phone number: ")
+        if len(phoneno)==10:
+            break
+        else:
+            print("Enter Valid Phone Number!")
+            continue
+    while True:
+        password = input("Enter password(Include an uppercase,lowercase,number and special character): ")
+        conditions = [0, 0, 0, 0]
+        for i in password:
+            if i.isupper():
+                conditions[0] = 1
+            elif 33<=ord(i)<=47:
+                conditions[3] = 1
+            elif 58<=ord(i)<=64:
+                conditions[3] = 1
+            elif i.islower():
+                conditions[1] = 1
+            elif i in '0123456789':
+                conditions[2] = 1
+        for i in range(len(conditions)):
+            if conditions[i] != 1 and i == 0:
+                print("Please include an uppercase character!")
+                break
+            elif conditions[i] != 1 and i == 1:
+                print("Please include a lowercase character!")
+                break
+            elif conditions[i] != 1 and i == 2:
+                print("Please include a number!")
+                break
+            elif conditions[i] != 1 and i == 3:
+                print("Please include a special character!")
+                break
+        break
+    while True:
+        repass = input("Please Re-Enter your password: ")
+        if repass == password:
+            all_u_data = []
+            while True:
+                try:
+                    chck_data = pickle.load(f)
+                    all_u_data.append(chck_data)
+                except:
+                    break
+            for i in all_u_data:
+                if all_u_data[i][0] == phoneno:
+                    print("Account with given phone number aldready exists!")
+                    entersite()
+                else:
+                    break
+                break
+        else:
+            print("Passwords do not match")
+            continue
+        break
+    pickle.dump([phoneno, password],f)
+    f.close()
+    print("Account has been created, Login to continue")
+    login()
+
+def login():
+    import random
+    import pickle
+    f = open('UserData.dat','rb')
+    phoneno = input("Enter Phone Number: ")
+    password = input("Enter Password: ")
+    u_data = [phoneno,password]
+    all_u_data = []
+
+    while True:
+        try:
+            chck_data = pickle.load(f)
+            all_u_data.append(chck_data)
+        except:
+            break
+    for i in all_u_data:
+        if i == u_data:
+            print("Signing In", end='')
+            y = random.randint(1, 10)
+            for i in range(y):
+                print('.', end='')
+            print("Succesfully logged In!")
+            f.close()
+            break
+    else:
+        print("Invalid Credentials!")
+        entersite()
+entersite()
