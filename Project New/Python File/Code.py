@@ -120,7 +120,7 @@ def addtocart(restdict):  # function to add items to cart
             i += 1
         else:
             foodchoice = int(
-                input("Enter Item Number of food item you would like to add: "))  # indec of item they choose
+                input("Enter Item Number of food item you would like to add: "))  # index of item they choose
             quantity = int(input("Enter quantity you would like to order: "))  # quantity of item
             menu = restdict[restchoice]  # next 6 lines are for getting item price
         for items in menu:
@@ -128,13 +128,13 @@ def addtocart(restdict):  # function to add items to cart
                 itemprice = int(items[-1])
                 price = itemprice
         for i in restdict:  # adding item to cart
-            for j in range(len(restdict[i])):
-                if i == restchoice and restdict[i][j][0] not in list(cart.keys()):
+            for j in range(len(restdict[restchoice])):
+                if i == restchoice and restdict[restchoice][foodchoice-1][0] not in list(cart.keys()):
                     cart[restdict[i][foodchoice - 1][0]] = (restchoice, price, quantity)
                     break
-                elif i == restchoice and restdict[i][j][0] in list(cart.keys()):
-                    quan = cart[restdict[i][foodchoice - 1][0]][-1] + quantity
-                    cart[restdict[i][foodchoice - 1][0]] = (restchoice, price, quan)
+                elif i == restchoice and restdict[restchoice][j][0] in list(cart.keys()):
+                    quan = cart[restdict[restchoice][foodchoice - 1][0]][-1] + quantity
+                    cart[restdict[restchoice][foodchoice - 1][0]] = (restchoice, price, quan)
                     break
         yorn = input("Would you like to add another item(y/n)? ")
         if yorn.lower() == 'n':
@@ -144,7 +144,6 @@ def addtocart(restdict):  # function to add items to cart
 
 def viewcart(cart):
     from math import ceil
-    print(cart)
     bill = PrettyTable(["S.No", "Item", "Quantity", "Price"])
     total = 0
     serialno = 1
@@ -309,17 +308,24 @@ def signup():
         for i in range(len(conditions)):
             if conditions[i] != 1 and i == 0:
                 print("Please include an uppercase character!")
+                i = 1
                 break
             elif conditions[i] != 1 and i == 1:
                 print("Please include a lowercase character!")
+                i = 1
                 break
             elif conditions[i] != 1 and i == 2:
                 print("Please include a number!")
+                i = 1
                 break
             elif conditions[i] != 1 and i == 3:
                 print("Please include a special character!")
+                i = 1
                 break
-        break
+        if i == 1:
+            continue
+        else:
+            break
     while True:
         repass = input("Please Re-Enter your password: ")
         if repass == password:
@@ -375,7 +381,7 @@ def login():
         entersite()
 
 
-entersite()
+#entersite()
 restdict = getdata()  # Function to get data from
 averrest = cheaprest(restdict)  # Returns the average price of each restaurant
 cart = addtocart(restdict)  # Gives the cart of the user
