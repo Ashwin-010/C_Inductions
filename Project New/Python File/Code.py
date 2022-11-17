@@ -2,7 +2,7 @@ import csv
 import ast
 from prettytable import PrettyTable
 from decimal import *
-
+import time
 
 def getdata():  # Function to get data from the csv file from
     # on to get the data of the restaurants from a csv file
@@ -87,6 +87,10 @@ def dispavg(averrest, restdict, locdata):
             break
         else:
             print("Enter Valid Restaurant Number!")
+    restchoice = restlist[restnum - 1]
+    if viewords(phoneno,restchoice):
+        print("Continuing in 10 seconds!")
+        time.sleep(10)
     myTable2 = PrettyTable(["Number", "Dishes", "Price"])
     n = 1
     for i in menu:  # Prints the menu of the restaurant chosen by the user
@@ -143,19 +147,26 @@ def addtocart(restdict):  # function to add items to cart
 
 
 def viewcart(cart):
+    import datetime as dt
     from math import ceil
+    order = [["S.No", "Item", "Quantity", "Price"]]
     bill = PrettyTable(["S.No", "Item", "Quantity", "Price"])
     total = 0
     serialno = 1
     for i in cart:
         bill.add_row([serialno, i, cart[i][-1], (cart[i][1] * cart[i][-1])])
+        order.append([serialno, i, cart[i][-1], (cart[i][1] * cart[i][-1])])
         total += ((cart[i][1]) * (cart[i][-1]))
         serialno += 1
     print(bill)
     print("Total = Rs.", total)
     print("GST = 18%")
     print("Grand Total = Rs.", ceil(total + total * 0.18), )
-
+    phstr = str(phoneno) +'.dat'
+    time = dt.datetime.now()
+    f = open(phstr,'ab')
+    pickle.dump([phoneno,time,restchoice,order],f)
+    f.close()
 
 def ratingscreate():  # Creates a file called ratefile which contains empty ratings in the format [restname,[ratings]]
     ratingslist = []
@@ -351,11 +362,12 @@ def signup():
     f.close()
     print("Account has been created, Login to continue")
     login()
-
+phoneno = 0
 def login():
     import random
     import pickle
     f = open('UserData.dat','rb')
+    global phoneno
     phoneno = input("Enter Phone Number: ")
     password = input("Enter Password: ")
     u_data = [phoneno,password]
@@ -370,18 +382,52 @@ def login():
     for i in all_u_data:
         if i == u_data:
             print("Signing In", end='')
-            y = random.randint(1, 10)
+            y = random.randint(2,5)
             for i in range(y):
+                time.sleep(0.5)
                 print('.', end='')
             print("Succesfully logged In!")
             f.close()
             break
     else:
+        time.sleep(1.5)
         print("Invalid Credentials!")
         entersite()
 
+def viewords(phoneno,restchoice):
+    yorn = input("Would you like to view your past orders from this restaurant?(Y/N)")
+    if yorn.lower()=='y':
+        phstr = str(phoneno)+'.dat'
+        try:
+            f=open(phstr,'rb')
+            pastords = []
+            while True:
+                try:
+                    data = pickle.load(f)
+                    pastords.append(data)
+                except:
+                    break
+            f.close()
+            sno = 1
+            for i in range(len(pastords)):
+                if pastords[i][2] == restchoice:
+                    print("Order Placed on", pastords[i][1], "from", pastords[i][2])
+                    order = PrettyTable(pastords[i][3][0])
+                    for j in pastords[i][3]:
+                        if type(j[0]) == int:
+                            order.add_row(j)
+                    print(order)
+                elif i == len(pastords)-1:
+                    print("You have not placed any orders from this restaurant!")
+                    time.sleep(2)
+                    return 0
+            return 1
+        except:
+            print("You have not placed any orders from this restaurant!")
+            time.sleep(2)
+            return 0
 
-#entersite()
+entersite()
 restdict = getdata()  # Function to get data from
 averrest = cheaprest(restdict)  # Returns the average price of each restaurant
 cart = addtocart(restdict)  # Gives the cart of the user
