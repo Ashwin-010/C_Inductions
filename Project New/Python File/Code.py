@@ -3,6 +3,154 @@ import ast
 from prettytable import PrettyTable
 from decimal import *
 import time
+import pickle
+
+def entersite():
+    print('''Welcome to Fast Eats!
+    1.Sign up
+    2.Login
+    3.Exit''')
+    choice = int(input("What would you like to do: "))
+    if choice == 1:
+        signup()
+    elif choice == 2:
+        login()
+    elif choice == 3:
+        quit()
+        
+def signup():
+    f = open('UserData.dat','ab')
+    while True:
+        phoneno = input("Enter Phone number: ")
+        if len(phoneno)==10:
+            break
+        else:
+            print("Enter Valid Phone Number!")
+            continue
+    while True:
+        password = input("Enter password(Include an uppercase,lowercase,number and special character): ")
+        conditions = [0, 0, 0, 0]
+        for i in password:
+            if i.isupper():
+                conditions[0] = 1
+            elif 33<=ord(i)<=47:
+                conditions[3] = 1
+            elif 58<=ord(i)<=64:
+                conditions[3] = 1
+            elif i.islower():
+                conditions[1] = 1
+            elif i in '0123456789':
+                conditions[2] = 1
+        for i in range(len(conditions)):
+            if conditions[i] != 1 and i == 0:
+                print("Please include an uppercase character!")
+                i = 1
+                break
+            elif conditions[i] != 1 and i == 1:
+                print("Please include a lowercase character!")
+                i = 1
+                break
+            elif conditions[i] != 1 and i == 2:
+                print("Please include a number!")
+                i = 1
+                break
+            elif conditions[i] != 1 and i == 3:
+                print("Please include a special character!")
+                i = 1
+                break
+        if i == 1:
+            continue
+        else:
+            break
+    while True:
+        repass = input("Please Re-Enter your password: ")
+        if repass == password:
+            all_u_data = []
+            while True:
+                try:
+                    chck_data = pickle.load(f)
+                    all_u_data.append(chck_data)
+                except:
+                    break
+            for i in all_u_data:
+                if all_u_data[i][0] == phoneno:
+                    print("Account with given phone number aldready exists!")
+                    entersite()
+                else:
+                    break
+                break
+        else:
+            print("Passwords do not match")
+            continue
+        break
+    pickle.dump([phoneno, password],f)
+    f.close()
+    print("Account has been created, Login to continue")
+    login()
+phoneno = 0
+def login():
+    import random
+    import pickle
+    f = open('UserData.dat','rb')
+    global phoneno
+    phoneno = input("Enter Phone Number: ")
+    password = input("Enter Password: ")
+    u_data = [phoneno,password]
+    all_u_data = []
+
+    while True:
+        try:
+            chck_data = pickle.load(f)
+            all_u_data.append(chck_data)
+        except:
+            break
+    for i in all_u_data:
+        if i == u_data:
+            print("Signing In", end='')
+            y = random.randint(2,5)
+            for i in range(y):
+                time.sleep(0.5)
+                print('.', end='')
+            print("Succesfully logged In!")
+            f.close()
+            break
+    else:
+        time.sleep(1.5)
+        print("Invalid Credentials!")
+        entersite()
+
+def viewords(phoneno,restchoice):
+    yorn = input("Would you like to view your past orders from this restaurant?(Y/N)")
+    if yorn.lower()=='y':
+        phstr = str(phoneno)+'.dat'
+        try:
+            f=open(phstr,'rb')
+            pastords = []
+            while True:
+                try:
+                    data = pickle.load(f)
+                    pastords.append(data)
+                except:
+                    break
+            f.close()
+            sno = 1
+            for i in range(len(pastords)):
+                if pastords[i][2] == restchoice:
+                    print("Order Placed on", pastords[i][1], "from", pastords[i][2])
+                    order = PrettyTable(pastords[i][3][0])
+                    for j in pastords[i][3]:
+                        if type(j[0]) == int:
+                            order.add_row(j)
+                    print(order)
+                elif i == len(pastords)-1:
+                    print("You have not placed any orders from this restaurant!")
+                    time.sleep(2)
+                    return 0
+            return 1
+        except:
+            print("You have not placed any orders from this restaurant!")
+            time.sleep(2)
+            return 0
 
 def getdata():  # Function to get data from the csv file from
     # on to get the data of the restaurants from a csv file
@@ -64,29 +212,24 @@ def dispavg(averrest, restdict, locdata):
         typesort = int(input('''Sort by(Enter Number):
         1. Restaurant Name
         2. Average Price
-        3. Rating
+        3.Rating
         4.Location:'''''))
         if typesort == 1:
             print(myTable.get_string(sortby="Restaurant Name"))
         elif typesort == 2:
             print(myTable.get_string(sortby="Average Price"))
         elif typesort == 3:
-            print(myTable.get_string(sortby="Rating"))
+            print(myTable.get_string(sortby="Rating",reversesort = True))
         elif typesort == 4:
             print(myTable.get_string(sortby="Location"))
     while True:
-        try:
-            restnum = int(
-                input("Enter which restaurant you would like to choose:"))  # Asks the user to choose a restaurant
-        except:
-            print("Enter Valid Restaurant Number!")
-            continue
-        if (restnum > 0 and restnum < len(restlist)) and type(restnum) == int:
-            menu = restdict[
-                restlist[restnum - 1]]  # Get restaurant name from restlist and then get its menu from restdict
+        restnum = int(input("Enter which restaurant you would like to choose:"))  # Asks the user to choose a restaurant
+        if (restnum > 0 and restnum <= len(restlist)) and type(restnum) == int:
+            menu = restdict[restlist[restnum - 1]]  # Get restaurant name from restlist and then get its menu from restdict
             break
         else:
             print("Enter Valid Restaurant Number!")
+            continue
     restchoice = restlist[restnum - 1]
     if viewords(phoneno,restchoice):
         print("Continuing in 10 seconds!")
@@ -277,157 +420,7 @@ def getrestloc():
     return restlocdata
 
 
-def entersite():
-    import pickle
-    print('''Welcome to Fast Eats!
-    1.Sign up
-    2.Login
-    3.Exit''')
-    choice = int(input("What would you like to do: "))
-    if choice == 1:
-        signup()
-    elif choice == 2:
-        login()
-    elif choice == 3:
-        quit()
-
-
-def signup():
-    import pickle
-    f = open('UserData.dat','ab')
-    while True:
-        phoneno = input("Enter Phone number: ")
-        if len(phoneno)==10:
-            break
-        else:
-            print("Enter Valid Phone Number!")
-            continue
-    while True:
-        password = input("Enter password(Include an uppercase,lowercase,number and special character): ")
-        conditions = [0, 0, 0, 0]
-        for i in password:
-            if i.isupper():
-                conditions[0] = 1
-            elif 33<=ord(i)<=47:
-                conditions[3] = 1
-            elif 58<=ord(i)<=64:
-                conditions[3] = 1
-            elif i.islower():
-                conditions[1] = 1
-            elif i in '0123456789':
-                conditions[2] = 1
-        for i in range(len(conditions)):
-            if conditions[i] != 1 and i == 0:
-                print("Please include an uppercase character!")
-                i = 1
-                break
-            elif conditions[i] != 1 and i == 1:
-                print("Please include a lowercase character!")
-                i = 1
-                break
-            elif conditions[i] != 1 and i == 2:
-                print("Please include a number!")
-                i = 1
-                break
-            elif conditions[i] != 1 and i == 3:
-                print("Please include a special character!")
-                i = 1
-                break
-        if i == 1:
-            continue
-        else:
-            break
-    while True:
-        repass = input("Please Re-Enter your password: ")
-        if repass == password:
-            all_u_data = []
-            while True:
-                try:
-                    chck_data = pickle.load(f)
-                    all_u_data.append(chck_data)
-                except:
-                    break
-            for i in all_u_data:
-                if all_u_data[i][0] == phoneno:
-                    print("Account with given phone number aldready exists!")
-                    entersite()
-                else:
-                    break
-                break
-        else:
-            print("Passwords do not match")
-            continue
-        break
-    pickle.dump([phoneno, password],f)
-    f.close()
-    print("Account has been created, Login to continue")
-    login()
-phoneno = 0
-def login():
-    import random
-    import pickle
-    f = open('UserData.dat','rb')
-    global phoneno
-    phoneno = input("Enter Phone Number: ")
-    password = input("Enter Password: ")
-    u_data = [phoneno,password]
-    all_u_data = []
-
-    while True:
-        try:
-            chck_data = pickle.load(f)
-            all_u_data.append(chck_data)
-        except:
-            break
-    for i in all_u_data:
-        if i == u_data:
-            print("Signing In", end='')
-            y = random.randint(2,5)
-            for i in range(y):
-                time.sleep(0.5)
-                print('.', end='')
-            print("Succesfully logged In!")
-            f.close()
-            break
-    else:
-        time.sleep(1.5)
-        print("Invalid Credentials!")
-        entersite()
-
-def viewords(phoneno,restchoice):
-    yorn = input("Would you like to view your past orders from this restaurant?(Y/N)")
-    if yorn.lower()=='y':
-        phstr = str(phoneno)+'.dat'
-        try:
-            f=open(phstr,'rb')
-            pastords = []
-            while True:
-                try:
-                    data = pickle.load(f)
-                    pastords.append(data)
-                except:
-                    break
-            f.close()
-            sno = 1
-            for i in range(len(pastords)):
-                if pastords[i][2] == restchoice:
-                    print("Order Placed on", pastords[i][1], "from", pastords[i][2])
-                    order = PrettyTable(pastords[i][3][0])
-                    for j in pastords[i][3]:
-                        if type(j[0]) == int:
-                            order.add_row(j)
-                    print(order)
-                elif i == len(pastords)-1:
-                    print("You have not placed any orders from this restaurant!")
-                    time.sleep(2)
-                    return 0
-            return 1
-        except:
-            print("You have not placed any orders from this restaurant!")
-            time.sleep(2)
-            return 0
-
-entersite()
+#entersite()
 restdict = getdata()  # Function to get data from
 averrest = cheaprest(restdict)  # Returns the average price of each restaurant
 cart = addtocart(restdict)  # Gives the cart of the user
