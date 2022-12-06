@@ -90,12 +90,10 @@ def signup():
         break
     bytephonenum = bytes(phoneno,'utf-8')
     encrypphonenum = key.encrypt(bytephonenum)
-    print(encrypphonenum)
-    encrypphonenum = str(encrypphonenum)
+    encrypphonenum = str(encrypphonenum,'utf-8')
     bytepassw = bytes(password,'utf-8')
     encryppassw = key.encrypt(bytepassw)
-    print(encryppassw)
-    encryppassw = str(encryppassw)
+    encryppassw = str(encryppassw,'utf-8')
     w.writerow([encrypphonenum, encryppassw])
     f.close()
     print("Account has been created, Login to continue")
@@ -106,40 +104,26 @@ def login():
     global phoneno
     phoneno = input("Enter Phone Number: ")
     password = input("Enter Password: ")
-    u_data = [phoneno,password]
-    all_u_data = []
     r = csv.reader(f)
     all_u_data = list(r)
-    for i in all_u_data:
-        print(i[0])
-        print(i[1])
-        if len(i) != 0 :
-            i[0].lstrip("r'")
-            i[0].rstrip("'")
-            i[1].lstrip("r'")
-            i[1].rstrip("'")
-            i[0] = bytes(i[0],'utf-8')
-            i[1] = bytes(i[1],'utf-8')
-            key.decrypt(i[0])
-            i[0] = str(key.decrypt(i[0]))
-            i[1] = str(key.decrypt(i[1]))
+    try:
+        for i,j in all_u_data:
+            if str(key.decrypt(bytes(i,'utf-8')),'utf-8') == phoneno and str(key.decrypt(bytes(j,'utf-8')),'utf-8') == password:
+                print("Signing In", end='')
+                y = random.randint(2,5)
+                for i in range(y):
+                    time.sleep(0.5)
+                    print('.', end='')
+                print("Successfully logged In!")
+                f.close()
+                break
         else:
-            break
-    for i in all_u_data:
-        print(i)
-        if key.decrypt(i) == u_data:
-            print("Signing In", end='')
-            y = random.randint(2,5)
-            for i in range(y):
-                time.sleep(0.5)
-                print('.', end='')
-            print("Successfully logged In!")
-            f.close()
-            break
-    else:
-        time.sleep(1.5)
-        print("Invalid Credentials!")
-        entersite()
+            time.sleep(1.5)
+            print("Invalid Credentials!")
+            entersite()
+    except:
+        f.close()
+        print('Error in csv file !!!')
 
 '''def viewords(phoneno,restchoice):
     yorn = input("Would you like to view your past orders from this restaurant?(Y/N)")
