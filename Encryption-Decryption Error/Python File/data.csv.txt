@@ -1,0 +1,4 @@
+Name Of Restaurant;Location;Menu
+Geetham Veg Restaurant;T Nagar;[[Idli;80],[Dosa;70],[Pongal;65],[Rice;80],[Chapati;90],[Coffee;40],[Tea;35]]
+Saravana Bhavan;Ashok Nagar;[[Dosa;60],[Idli;75],[Pongal;70],[Chapati;80],[Coffee;45],[Tea;30]]
+Shree Mithai;Ashok Nagar;[[Pav Bhaji;70],[Cheese Sev;61],[Almond Cookies;132],[Arabian Delight;115],[Oreo Cake;120]]
