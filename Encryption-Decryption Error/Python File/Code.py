@@ -1,8 +1,7 @@
 import csv
 import ast
-#from prettytable import PrettyTable
+from prettytable import PrettyTable
 from decimal import *
-import math as ms
 import random
 import pickle
 import time
@@ -98,34 +97,41 @@ def signup():
     f.close()
     print("Account has been created, Login to continue")
     login()
-phoneno = 0
+
 def login():
-    f = open('UserData.csv','r')
+    f = open('UserData.csv', 'r')
     global phoneno
+    global password
     phoneno = input("Enter Phone Number: ")
     password = input("Enter Password: ")
     r = csv.reader(f)
     all_u_data = list(r)
-    try:
-        for i,j in all_u_data:
-            if str(key.decrypt(bytes(i,'utf-8')),'utf-8') == phoneno and str(key.decrypt(bytes(j,'utf-8')),'utf-8') == password:
-                print("Signing In", end='')
-                y = random.randint(2,5)
-                for i in range(y):
-                    time.sleep(0.5)
-                    print('.', end='')
-                print("Successfully logged In!")
-                f.close()
-                break
-        else:
-            time.sleep(1.5)
-            print("Invalid Credentials!")
-            entersite()
-    except:
-        f.close()
-        print('Error in csv file !!!')
+    loginorno = 0
+    for i, j in all_u_data:
+        i = i.lstrip("b'")
+        i = i.rstrip("'")
+        j = j.lstrip("b'")
+        j = j.rstrip("'")
+        if str(key.decrypt(bytes(i, 'utf-8')), 'utf-8') == phoneno and str(key.decrypt(bytes(j, 'utf-8')),
+                                                                               'utf-8') == password:
+             print("Signing In", end='')
+             y = random.randint(2, 5)
+             for i in range(y):
+                 time.sleep(0.5)
+                 print('.', end='')
+                 print("Successfully logged In!")
+                 f.close()
+                 break
+             loginorno = 1
+    if loginorno == 0:
+        time.sleep(1.5)
+        print("Invalid Credentials!")
+        entersite()
 
-'''def viewords(phoneno,restchoice):
+def viewinfo():
+    print("Phone Number:",phoneno)
+    print("Password:",password)
+def viewords(phoneno,restchoice):
     yorn = input("Would you like to view your past orders from this restaurant?(Y/N)")
     if yorn.lower()=='y':
         phstr = str(phoneno)+'.dat'
@@ -156,7 +162,7 @@ def login():
         except:
             print("You have not placed any orders from this restaurant!")
             time.sleep(2)
-            return 0'''
+            return 0
 
 def getdata():  # Function to get data from the csv file from
     f = open('data.csv', 'r')
@@ -183,7 +189,6 @@ def getdata():  # Function to get data from the csv file from
             d1[restau] = l1
         elif len(i) != 1:
             l1.append(i)
-    print(ratingdict)
     for i in d1:
         if i not in ratingdict:
             ratingdict[i] = [0, '0']
@@ -212,6 +217,34 @@ def averrestau(restdict):  # function to find cheapest priced restaurant
         average = sumprices / len(price)
         averres.append((i, average))  # Creates a tuple in averres = [(Restaurant Name, Average)]
     return averres
+
+def menu():
+    userchoice = int(input('''What would you like to do today?
+        1. Check user info
+        2. Order food
+        3.Exit:'''))
+    if userchoice == 1:
+        viewinfo()
+        menu()
+    elif userchoice == 2:
+        global restdict
+        restdict = getdata()  # Function to get data from CSV File
+        global averrest
+        averrest = averrestau(restdict)  # Returns the average price of each restaurant
+        global cart
+        cart = addtocart(restdict)  # Gives the cart of the user
+        viewcart(cart)  # Basically gives the bill of the user
+        ratefile = open("rating.csv", "r")
+        ratelist = csv.reader(ratefile)
+        ratelist = list(ratelist)
+        print(ratelist)
+        if ratelist == []:  # To prevent it from clearing the rate file everytime the program is run so that the ratings get saved
+            ratingscreate()
+        rating()  # To add rating given by the user
+        ratingavgcreate()  # To create a blank average rating of every rating provided in a file
+        ratingsavg()
+    elif choice == 3:
+        print("Thank You, Have a nice day!")
 
 def dispavg(averrest, restdict, locdata):
     from math import ceil
@@ -426,19 +459,8 @@ def ratingsavg():
 
 
 entersite()
-'''restdict = getdata()# Function to get data from CSV File
-averrest = averrestau(restdict)# Returns the average price of each restaurant
-cart = addtocart(restdict)  # Gives the cart of the user
-viewcart(cart)  # Basically gives the bill of the user
-ratefile = open("rating.csv", "r")
-ratelist = csv.reader(ratefile)
-ratelist = list(ratelist)
-print(ratelist)
-if ratelist == []:  # To prevent it from clearing the rate file everytime the program is run so that the ratings get saved
-    ratingscreate()
-rating()  # To add rating given by the user
-ratingavgcreate()  # To create a blank average rating of every rating provided in a file
-ratingsavg()  # Creates a file containing thethe average rating of every restaurant'''
+menu()
+  # Creates a file containing thethe average rating of every restaurant'''
 
 
 
