@@ -2,11 +2,11 @@ import csv
 import ast
 from prettytable import PrettyTable
 from decimal import *
-import math as ms
 import random
 import pickle
 import time
 import datetime as dt
+from cryptography.fernet import Fernet
 
 def entersite():
     print('''Welcome to Fast Eats!
@@ -20,9 +20,11 @@ def entersite():
         login()
     elif choice == 3:
         quit()
-        
+key = Fernet(b'7FXASAwFtL74HPsAtwXMjTrmyAQM3-pUF_C6dpsGeF4=')
+
 def signup():
-    f = open('UserData.dat','ab')
+    f = open('UserData.csv','a',newline = '')
+    w = csv.writer(f)
     while True:
         phoneno = input("Enter Phone number: ")
         if len(phoneno)==10:
@@ -86,38 +88,50 @@ def signup():
             print("Passwords do not match")
             continue
         break
-    pickle.dump([phoneno, password],f)
+    bytephonenum = bytes(phoneno,'utf-8')
+    encrypphonenum = key.encrypt(bytephonenum)
+    encrypphonenum = str(encrypphonenum,'utf-8')
+    bytepassw = bytes(password,'utf-8')
+    encryppassw = key.encrypt(bytepassw)
+    encryppassw = str(encryppassw,'utf-8')
+    w.writerow([encrypphonenum, encryppassw])
     f.close()
     print("Account has been created, Login to continue")
     login()
-phoneno = 0
+
 def login():
-    f = open('UserData.dat','rb')
+    f = open('UserData.csv', 'r')
     global phoneno
+    global password
     phoneno = input("Enter Phone Number: ")
     password = input("Enter Password: ")
-    u_data = [phoneno,password]
-    all_u_data = []
-    while True:
-        try:
-            chck_data = pickle.load(f)
-            all_u_data.append(chck_data)
-        except:
-            break
-    for i in all_u_data:
-        if i == u_data:
-            print("Signing In", end='')
-            y = random.randint(2,5)
-            for i in range(y):
-                time.sleep(0.5)
-                print('.', end='')
-            print("Successfully logged In!")
-            f.close()
-            break
-    else:
+    r = csv.reader(f)
+    all_u_data = list(r)
+    loginorno = 0
+    for i, j in all_u_data:
+        i = i.lstrip("b'")
+        i = i.rstrip("'")
+        j = j.lstrip("b'")
+        j = j.rstrip("'")
+        if str(key.decrypt(bytes(i, 'utf-8')), 'utf-8') == phoneno and str(key.decrypt(bytes(j, 'utf-8')),
+                                                                               'utf-8') == password:
+             print("Signing In", end='')
+             y = random.randint(2, 5)
+             for i in range(y):
+                 time.sleep(0.5)
+                 print('.', end='')
+                 print("Successfully logged In!")
+                 f.close()
+                 break
+             loginorno = 1
+    if loginorno == 0:
         time.sleep(1.5)
         print("Invalid Credentials!")
         entersite()
+
+def viewinfo():
+    print("Phone Number:",phoneno)
+    print("Password:",password)
 
 def viewords(phoneno,restchoice):
     yorn = input("Would you like to view your past orders from this restaurant?(Y/N)")
@@ -134,18 +148,20 @@ def viewords(phoneno,restchoice):
                     break
             f.close()
             sno = 1
+            checknum = 0
             for i in range(len(pastords)):
                 if pastords[i][2] == restchoice:
                     print("Order Placed on", pastords[i][1], "from", pastords[i][2])
+                    checknum = 1
                     order = PrettyTable(pastords[i][3][0])
                     for j in pastords[i][3]:
                         if type(j[0]) == int:
                             order.add_row(j)
                     print(order)
-                elif i == len(pastords)-1:
-                    print("You have not placed any orders from this restaurant!")
-                    time.sleep(2)
-                    return 0
+            if checknum == 0:
+                print("You have not placed any orders from this restaurant!")
+                time.sleep(2)
+                return 0
             return 1
         except:
             print("You have not placed any orders from this restaurant!")
@@ -165,8 +181,12 @@ def getdata():  # Function to get data from the csv file from
     rateavg = list(rateavg)
     for i in rateavg:
         if i != []:
-            roundavg = round(Decimal(i[1]), 1)
-            ratingdict[i[0]] = [roundavg, i[-1]]
+            if i[1] != '':
+                roundavg = round(Decimal(i[1]), 1)
+                ratingdict[i[0]] = [roundavg, i[-1]]
+            elif i[1] == '':
+                roundavg = 0
+                ratingdict[i[0]] = [roundavg, i[-1]]
     for i in data:  # A loop to remove the newline character of a csv file which is produced when we directly write to it(Empty list is recieved when we read)
         if i == []:
             data.remove(i)
@@ -177,7 +197,6 @@ def getdata():  # Function to get data from the csv file from
             d1[restau] = l1
         elif len(i) != 1:
             l1.append(i)
-    print(ratingdict)
     for i in d1:
         if i not in ratingdict:
             ratingdict[i] = [0, '0']
@@ -203,10 +222,36 @@ def averrestau(restdict):  # function to find cheapest priced restaurant
             itemprice = float(items[-1])
             price.append(itemprice)
         sumprices = sum(price)
-        average = sumprices / len(price)
+        average = round(Decimal(sumprices / len(price)),1)
         averres.append((i, average))  # Creates a tuple in averres = [(Restaurant Name, Average)]
     return averres
 
+def menu():
+    userchoice = int(input('''What would you like to do today?
+        1. Check user info
+        2. Order food
+        3.Exit:'''))
+    if userchoice == 1:
+        viewinfo()
+        menu()
+    elif userchoice == 2:
+        global restdict
+        restdict = getdata()  # Function to get data from CSV File
+        global averrest
+        averrest = averrestau(restdict)  # Returns the average price of each restaurant
+        global cart
+        cart = addtocart(restdict)  # Gives the cart of the user
+        viewcart(cart)  # Basically gives the bill of the user
+        ratefile = open("rating.csv", "r")
+        ratelist = csv.reader(ratefile)
+        ratelist = list(ratelist)
+        if ratelist == []:  # To prevent it from clearing the rate file everytime the program is run so that the ratings get saved
+            ratingscreate()
+        rating()  # To add rating given by the user
+        ratingavgcreate()  # To create a blank average rating of every rating provided in a file
+        ratingsavg()
+    elif choice == 3:
+        print("Thank You, Have a nice day!")
 
 def dispavg(averrest, restdict, locdata):
     from math import ceil
@@ -215,8 +260,13 @@ def dispavg(averrest, restdict, locdata):
     locations = list(locdata.keys())
     restlist = []  # List containing restaurant names
     for i in range(len(averrest)):# Print every restaurant name and the restaurant's average price
-        myTable.add_row([i + 1, averrest[i][0], averrest[i][1], ratingdict[averrest[i][0]][0], ratingdict[averrest[i][0]][-1], locdata[locations[i]]])
-        restlist.append(averrest[i][0])
+        if ratingdict[averrest[i][0]][-1] == '':
+            myTable.add_row(
+                [i + 1, averrest[i][0], averrest[i][1], ratingdict[averrest[i][0]][0], 0, locdata[locations[i]]])
+            restlist.append(averrest[i][0])
+        else:
+            myTable.add_row([i + 1, averrest[i][0], averrest[i][1], ratingdict[averrest[i][0]][0], ratingdict[averrest[i][0]][-1], locdata[locations[i]]])
+            restlist.append(averrest[i][0])
     print(myTable)
     usersort = input("Would you like to sort this table(Y/N):")
     if usersort.lower() == "y":
@@ -271,8 +321,10 @@ def addtocart(restdict):  # function to add items to cart
                     print("Enter Valid Food Item Number!")
             while True:
                 quantity = int(input("Enter quantity you would like to order: "))  # quantity of item
-                if quantity > 0:
+                if quantity > 0 and quantity < 50:
                     break
+                elif quantity > 50:
+                    print("The required quantity of food is not available")
                 else:
                     print("Enter a Valid Amount!")
             i += 1
@@ -334,7 +386,6 @@ def ratingscreate():  # Creates a file called ratefile which contains empty rati
     with open("rating.csv") as f:
         r = csv.reader(f)
         l = list(r)
-        print(l)
         no_ratings = []
         for i in l:
             no_ratings.append(i[-1])
@@ -344,7 +395,7 @@ def ratingscreate():  # Creates a file called ratefile which contains empty rati
 def ratingavgcreate():  # To create a file which contains the average of price of every restaurant in the format [restname,ratingavg]
     ratingavglist = []
     for i in restdict:
-        ratelisele = [i, []]
+        ratelisele = [i, '']
         ratingavglist.append(ratelisele)
         rateavgfile = open("rateavg.csv", "w")
         w = csv.writer(rateavgfile)
@@ -360,21 +411,19 @@ def rating():  # Accepts rating from the user and adds it to teh file
     yorn = input("Would you like to add a rating for the following restaurant(Y/N)?")
     while True:
         if yorn.lower() == "y":
-            rating = float(input("Enter your rating for the following restaurant(_/5):"))
-            if rating >= 0 and rating <= 5:
+            rating = input("Enter your rating for the following restaurant(_/5):")
+            if float(rating) >= 0 and float(rating) <= 5:
                 print("Your Feedback has been recorded!")
                 ratefile = open("rating.csv",
                                 "r")  # Opening file containing empty rates/old rates in the form [restname,[ratings]]
                 r = csv.reader(ratefile)
                 ratings = list(r)
                 ratefile.close()
-                for i in ratings:  # 1st Loop:To make every string in the format of list to list(cannot use str)
-                    if i != []:
-                        i[1] = ast.literal_eval(i[1])
                 for i in ratings:  # 2nd Loop:To append the rating to the list of ratings present already(nothing or old ratings)
                     if i != []:
                         if i[0] == restname:
-                            i[1].append(rating)
+                            oldratings = i[1]
+                            i[1] = oldratings + rating + ';'
                 ratefile = open("rating.csv", "w")
                 w1 = csv.writer(ratefile)
                 for i in ratings:  # 3rd Loop: To write the list with the new rating to the file
@@ -402,38 +451,24 @@ def ratingsavg():
     ratefile.close()
     rateavgfile = open("rateavg.csv", "w")
     w2 = csv.writer(rateavgfile)
-    for i in allrates:  # To convert string in the form of list to list to calculate average
-        if i != []:
-            i[1] = ast.literal_eval(i[1])
-    for i in ratings:  # To convert string in the form of list to list to add value(Maybe not needed?)
-        if i != []:
-            i[1] = ast.literal_eval(i[1])
     for i in allrates:  # Loop to write the values of the average rates to the file rateavg
-        if i != []:
-            try:  # Try and except incase the sum is zero(ie:there are no ratings)
-                rateavg = (sum(i[1])) / (len(i[1]))
-                w2.writerow([i[0], rateavg, len(i[1])])
+        if i != []:# Try and except incase the sum is zero(ie:there are no ratings)
+            try:
+                values = i[1].split(';')
+                for j in range(len(values)):
+                    if values[j] != '':
+                        values[j] = float(values[j])  # To convert the values from string to integer
+                    elif values[j] == '':
+                        values.remove('')
+                rateavg = sum(values)/len(values)
+                l1 = [i[0], rateavg, len(values)]
+                w2.writerow(l1)
             except:
-                w2.writerow([i[0], 0])
+                w2.writerow([i[0], 0,0])
 
-
-
-
-
-#entersite()
-restdict = getdata()# Function to get data from CSV File
-averrest = averrestau(restdict)# Returns the average price of each restaurant
-cart = addtocart(restdict)  # Gives the cart of the user
-viewcart(cart)  # Basically gives the bill of the user
-ratefile = open("rating.csv", "r")
-ratelist = csv.reader(ratefile)
-ratelist = list(ratelist)
-print(ratelist)
-if ratelist == []:  # To prevent it from clearing the rate file everytime the program is run so that the ratings get saved
-    ratingscreate()
-rating()  # To add rating given by the user
-ratingavgcreate()  # To create a blank average rating of every rating provided in a file
-ratingsavg()  # Creates a file containing thethe average rating of every restaurant
+entersite()
+menu()
+  # Creates a file containing thethe average rating of every restaurant'''
 
 
 
