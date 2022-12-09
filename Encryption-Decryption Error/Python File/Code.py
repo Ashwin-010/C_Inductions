@@ -131,6 +131,7 @@ def login():
 def viewinfo():
     print("Phone Number:",phoneno)
     print("Password:",password)
+
 def viewords(phoneno,restchoice):
     yorn = input("Would you like to view your past orders from this restaurant?(Y/N)")
     if yorn.lower()=='y':
@@ -177,8 +178,12 @@ def getdata():  # Function to get data from the csv file from
     rateavg = list(rateavg)
     for i in rateavg:
         if i != []:
-            roundavg = round(Decimal(i[1]), 1)
-            ratingdict[i[0]] = [roundavg, i[-1]]
+            if i[1] != '':
+                roundavg = round(Decimal(i[1]), 1)
+                ratingdict[i[0]] = [roundavg, i[-1]]
+            elif i[1] == '':
+                roundavg = 0
+                ratingdict[i[0]] = [roundavg, i[-1]]
     for i in data:  # A loop to remove the newline character of a csv file which is produced when we directly write to it(Empty list is recieved when we read)
         if i == []:
             data.remove(i)
@@ -253,8 +258,13 @@ def dispavg(averrest, restdict, locdata):
     locations = list(locdata.keys())
     restlist = []  # List containing restaurant names
     for i in range(len(averrest)):# Print every restaurant name and the restaurant's average price
-        myTable.add_row([i + 1, averrest[i][0], averrest[i][1], ratingdict[averrest[i][0]][0], ratingdict[averrest[i][0]][-1], locdata[locations[i]]])
-        restlist.append(averrest[i][0])
+        if ratingdict[averrest[i][0]][-1] == '':
+            myTable.add_row(
+                [i + 1, averrest[i][0], averrest[i][1], ratingdict[averrest[i][0]][0], 0, locdata[locations[i]]])
+            restlist.append(averrest[i][0])
+        else:
+            myTable.add_row([i + 1, averrest[i][0], averrest[i][1], ratingdict[averrest[i][0]][0], ratingdict[averrest[i][0]][-1], locdata[locations[i]]])
+            restlist.append(averrest[i][0])
     print(myTable)
     usersort = input("Would you like to sort this table(Y/N):")
     if usersort.lower() == "y":
@@ -372,7 +382,6 @@ def ratingscreate():  # Creates a file called ratefile which contains empty rati
     with open("rating.csv") as f:
         r = csv.reader(f)
         l = list(r)
-        print(l)
         no_ratings = []
         for i in l:
             no_ratings.append(i[-1])
@@ -382,7 +391,7 @@ def ratingscreate():  # Creates a file called ratefile which contains empty rati
 def ratingavgcreate():  # To create a file which contains the average of price of every restaurant in the format [restname,ratingavg]
     ratingavglist = []
     for i in restdict:
-        ratelisele = [i, []]
+        ratelisele = [i, '']
         ratingavglist.append(ratelisele)
         rateavgfile = open("rateavg.csv", "w")
         w = csv.writer(rateavgfile)
@@ -398,21 +407,19 @@ def rating():  # Accepts rating from the user and adds it to teh file
     yorn = input("Would you like to add a rating for the following restaurant(Y/N)?")
     while True:
         if yorn.lower() == "y":
-            rating = float(input("Enter your rating for the following restaurant(_/5):"))
-            if rating >= 0 and rating <= 5:
+            rating = input("Enter your rating for the following restaurant(_/5):")
+            if float(rating) >= 0 and float(rating) <= 5:
                 print("Your Feedback has been recorded!")
                 ratefile = open("rating.csv",
                                 "r")  # Opening file containing empty rates/old rates in the form [restname,[ratings]]
                 r = csv.reader(ratefile)
                 ratings = list(r)
                 ratefile.close()
-                for i in ratings:  # 1st Loop:To make every string in the format of list to list(cannot use str)
-                    if i != []:
-                        i[1] = ast.literal_eval(i[1])
                 for i in ratings:  # 2nd Loop:To append the rating to the list of ratings present already(nothing or old ratings)
                     if i != []:
                         if i[0] == restname:
-                            i[1].append(rating)
+                            oldratings = i[1]
+                            i[1] = oldratings + rating + ';'
                 ratefile = open("rating.csv", "w")
                 w1 = csv.writer(ratefile)
                 for i in ratings:  # 3rd Loop: To write the list with the new rating to the file
@@ -440,23 +447,19 @@ def ratingsavg():
     ratefile.close()
     rateavgfile = open("rateavg.csv", "w")
     w2 = csv.writer(rateavgfile)
-    for i in allrates:  # To convert string in the form of list to list to calculate average
-        if i != []:
-            i[1] = ast.literal_eval(i[1])
-    for i in ratings:  # To convert string in the form of list to list to add value(Maybe not needed?)
-        if i != []:
-            i[1] = ast.literal_eval(i[1])
     for i in allrates:  # Loop to write the values of the average rates to the file rateavg
-        if i != []:
-            try:  # Try and except incase the sum is zero(ie:there are no ratings)
-                rateavg = (sum(i[1])) / (len(i[1]))
-                w2.writerow([i[0], rateavg, len(i[1])])
-            except:
-                w2.writerow([i[0], 0])
-
-
-
-
+        print(i)
+        if i != []:# Try and except incase the sum is zero(ie:there are no ratings)
+                values = i[1].split(';')
+                print(values)
+                for i in range(len(values)):
+                    if values[i] != '':
+                        values[i] = float(values[i])  # To convert the values from string to integer
+                    elif values[i] == '':
+                        values.remove('')
+                rateavg = sum(values)/len(values)
+                l1 = [i[0], rateavg, len(i[1])]
+                w2.writerow(l1)
 
 entersite()
 menu()
