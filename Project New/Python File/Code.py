@@ -335,7 +335,7 @@ def addtocart(restdict):  # function to add items to cart
             menu = restdict[restchoice]  # next 6 lines are for getting item price
         for items in menu:
             if items[0] == restdict[restchoice][foodchoice - 1][0]:
-                itemprice = int(items[-1])
+                itemprice = float(items[-1])
                 price = itemprice
         for i in restdict:  # adding item to cart
             for j in range(len(restdict[restchoice])):
