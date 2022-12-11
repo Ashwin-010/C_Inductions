@@ -7,7 +7,8 @@ import time
 import datetime as dt
 from cryptography.fernet import Fernet
 
-#ASKS THE USER WHETHER THEY WANT TO LOGIN OR SIGNUP
+
+# ASKS THE USER WHETHER THEY WANT TO LOGIN OR SIGNUP
 def entersite():
     print('''Welcome to Fast Eats!
     1.Sign up
@@ -20,15 +21,18 @@ def entersite():
         login()
     elif choice == 3:
         quit()
+
+
 key = Fernet(b'7FXASAwFtL74HPsAtwXMjTrmyAQM3-pUF_C6dpsGeF4=')
 
-#ALLOWS THE USER TO SIGNUP 
+
+# ALLOWS THE USER TO SIGNUP
 def signup():
-    f = open('UserData.csv','a',newline = '')
+    f = open('UserData.csv', 'a', newline='')
     w = csv.writer(f)
     while True:
         phoneno = input("Enter Phone number: ")
-        if len(phoneno)==10:
+        if len(phoneno) == 10:
             break
         else:
             print("Enter Valid Phone Number!")
@@ -39,9 +43,9 @@ def signup():
         for i in password:
             if i.isupper():
                 conditions[0] = 1
-            elif 33<=ord(i)<=47:
+            elif 33 <= ord(i) <= 47:
                 conditions[3] = 1
-            elif 58<=ord(i)<=64:
+            elif 58 <= ord(i) <= 64:
                 conditions[3] = 1
             elif i.islower():
                 conditions[1] = 1
@@ -89,18 +93,19 @@ def signup():
             print("Passwords do not match")
             continue
         break
-    bytephonenum = bytes(phoneno,'utf-8')
+    bytephonenum = bytes(phoneno, 'utf-8')
     encrypphonenum = key.encrypt(bytephonenum)
-    encrypphonenum = str(encrypphonenum,'utf-8')
-    bytepassw = bytes(password,'utf-8')
+    encrypphonenum = str(encrypphonenum, 'utf-8')
+    bytepassw = bytes(password, 'utf-8')
     encryppassw = key.encrypt(bytepassw)
-    encryppassw = str(encryppassw,'utf-8')
+    encryppassw = str(encryppassw, 'utf-8')
     w.writerow([encrypphonenum, encryppassw])
     f.close()
     print("Account has been created, Login to continue")
     login()
 
-#ALLOWS THE USER TO LOGIN BASED ON PREVIOUSLY STORED USER DETAILS
+
+# ALLOWS THE USER TO LOGIN BASED ON PREVIOUSLY STORED USER DETAILS
 def login():
     f = open('UserData.csv', 'r')
     global phoneno
@@ -116,33 +121,34 @@ def login():
         j = j.lstrip("b'")
         j = j.rstrip("'")
         if str(key.decrypt(bytes(i, 'utf-8')), 'utf-8') == phoneno and str(key.decrypt(bytes(j, 'utf-8')),
-                                                                               'utf-8') == password:
-             print("Signing In", end='')
-             y = random.randint(2, 5)
-             for i in range(y):
-                 time.sleep(0.5)
-                 print('.', end='')
-                 print("Successfully logged In!")
-                 f.close()
-                 break
-             loginorno = 1
+                                                                           'utf-8') == password:
+            print("Signing In", end='')
+            y = random.randint(2,6)
+            for i in range(y):
+                time.sleep(0.5)
+                print('.', end='')
+                f.close()
+            print("Successfully logged In!")
+            loginorno = 1
     if loginorno == 0:
         time.sleep(1.5)
         print("Invalid Credentials!")
         entersite()
 
-#VIEW USER INFO
-def viewinfo():
-    print("Phone Number:",phoneno)
-    print("Password:",password)
 
-#VIEW PREVIOUS ORDERS BASED ON RESTAURANT CHOSEN
-def viewords(phoneno,restchoice):
+# VIEW USER INFO
+def viewinfo():
+    print("Phone Number:", phoneno)
+    print("Password:", password)
+
+
+# VIEW PREVIOUS ORDERS BASED ON RESTAURANT CHOSEN
+def viewords(phoneno, restchoice):
     yorn = input("Would you like to view your past orders from this restaurant?(Y/N)")
-    if yorn.lower()=='y':
-        phstr = str(phoneno)+'.dat'
+    if yorn.lower() == 'y':
+        phstr = str(phoneno) + '.dat'
         try:
-            f=open(phstr,'rb')
+            f = open(phstr, 'rb')
             pastords = []
             while True:
                 try:
@@ -172,8 +178,9 @@ def viewords(phoneno,restchoice):
             time.sleep(2)
             return 0
 
-#TO GET DATA FOR EACH RESTAURANT FROM A CSV FILE
-def getdata():  # Function to get data from the csv file from
+
+# TO GET DATA FOR EACH RESTAURANT FROM A CSV FILE
+def getdata(): 
     f = open('data.csv', 'r')
     r = csv.reader(f)
     data = list(r)
@@ -192,7 +199,7 @@ def getdata():  # Function to get data from the csv file from
             elif i[1] == '':
                 roundavg = 0
                 ratingdict[i[0]] = [roundavg, i[-1]]
-    for i in data:  # A loop to remove the newline character of a csv file which is produced when we directly write to it(Empty list is recieved when we read)
+    for i in data:  
         if i == []:
             data.remove(i)
     for i in data:  # To create a dictionary----> {'Restaurant Name1':[[Food Name1,Price1],[Food Name2,Price2]],'Restaurant Name2':[[Food Name1,Price1],[Food Name2,Price2]]}
@@ -207,7 +214,9 @@ def getdata():  # Function to get data from the csv file from
             ratingdict[i] = [0, '0']
     return d1
 
-#TO GET THE LOCATION OF EACH RESTAURANT
+
+
+# TO GET THE LOCATION OF EACH RESTAURANT
 def getrestloc():
     f = open("restloc.csv", newline='')
     r = csv.reader(f)
@@ -217,10 +226,11 @@ def getrestloc():
         restlocdata[(i[0])] = i[-1]
     return restlocdata
 
-#TO FIND THE AVERAGE PRICE OF EACH RESTAURANT BASED ON THEIR MENU
+
+# TO FIND THE AVERAGE PRICE OF EACH RESTAURANT BASED ON THEIR MENU
 def averrestau(restdict):
     lowprice = ('a', 1000000000000000000000000000000000000000)
-    averres = [] 
+    averres = []
     for i in restdict:
         menu = restdict[i]
         price = []
@@ -228,74 +238,78 @@ def averrestau(restdict):
             itemprice = float(items[-1])
             price.append(itemprice)
         sumprices = sum(price)
-        average = round(Decimal(sumprices / len(price)),1)
+        average = round(Decimal(sumprices / len(price)), 1)
         averres.append((i, average))
     return averres
 
 
-#TO DISPLAY THE DETAILS OF EACH RESTAURANT
+# TO DISPLAY THE DETAILS OF EACH RESTAURANT
 def dispavg(averrest, restdict, locdata):
     from math import ceil
-    myTable = PrettyTable(["Number", "Restaurant Name", "Average Price", "Rating","Number of Ratings","Location"])
+    myTable = PrettyTable(["Number", "Restaurant Name", "Average Price", "Rating", "Number of Ratings", "Location"])
     print("Choose a restaurant using the numbers to order from:")
     locations = list(locdata.keys())
-    restlist = [] 
+    restlist = []
     for i in range(len(averrest)):
         if ratingdict[averrest[i][0]][-1] == '':
             myTable.add_row(
                 [i + 1, averrest[i][0], averrest[i][1], ratingdict[averrest[i][0]][0], 0, locdata[locations[i]]])
             restlist.append(averrest[i][0])
         else:
-            myTable.add_row([i + 1, averrest[i][0], averrest[i][1], ratingdict[averrest[i][0]][0], ratingdict[averrest[i][0]][-1], locdata[locations[i]]])
+            myTable.add_row(
+                [i + 1, averrest[i][0], averrest[i][1], ratingdict[averrest[i][0]][0], ratingdict[averrest[i][0]][-1],
+                 locdata[locations[i]]])
             restlist.append(averrest[i][0])
     print(myTable)
     usersort = input("Would you like to sort this table(Y/N):")
     if usersort.lower() == "y":
-        typesort = int(input('''Sort by(Enter Number):
+        print('''Sort by:
         1. Restaurant Name
         2. Average Price
         3.Rating
         4.Location:'''))
+	   Typesort = int(input(“How Would you like to sort the table(Enter Number): “))
         if typesort == 1:
             print(myTable.get_string(sortby="Restaurant Name"))
         elif typesort == 2:
             print(myTable.get_string(sortby="Average Price"))
         elif typesort == 3:
-            print(myTable.get_string(sortby="Rating",reversesort = True))
+            print(myTable.get_string(sortby="Rating", reversesort=True))
         elif typesort == 4:
             print(myTable.get_string(sortby="Location"))
     while True:
-        restnum = int(input("Enter which restaurant you would like to choose:"))  
+        restnum = int(input("Enter which restaurant you would like to choose:"))
         if (restnum > 0 and restnum <= len(restlist)) and type(restnum) == int:
-            menu = restdict[restlist[restnum - 1]]  
+            menu = restdict[restlist[restnum - 1]]
             break
         else:
             print("Enter Valid Restaurant Number!")
             continue
     restchoice = restlist[restnum - 1]
-    if viewords(phoneno,restchoice):
+    if viewords(phoneno, restchoice):
         print("Continuing in 10 seconds!")
         time.sleep(10)
-    myTable2 = PrettyTable(["Number", "Dishes","Veg/Non Veg", "Price"])
+    myTable2 = PrettyTable(["Number", "Dishes", "Veg/Non Veg", "Price"])
     n = 1
-    for i in menu: 
-        myTable2.add_row([n, i[0],i[1],i[-1]])
+    for i in menu:
+        myTable2.add_row([n, i[0], i[1], i[-1]])
         n += 1
     print(myTable2)
     return restlist[restnum - 1]
 
-#TO CREATE THE CART OF THE USER
+
+# TO CREATE THE CART OF THE USER
 def addtocart(restdict):
     cart = {}
     i = 0
     while True:
         if i == 0:
             global restchoice
-            restchoice = dispavg(averrest, restdict, getrestloc())  
+            restchoice = dispavg(averrest, restdict, getrestloc())
             menu = restdict[restchoice]
             while True:
                 foodchoice = int(
-                    input("Enter Item Number of food item you would like to add: ")) 
+                    input("Enter Item Number of food item you would like to add: "))
                 if foodchoice > 0 and foodchoice <= len(menu):
                     break
                 else:
@@ -311,8 +325,8 @@ def addtocart(restdict):
             i += 1
         else:
             foodchoice = int(
-                input("Enter Item Number of food item you would like to add: ")) 
-            quantity = int(input("Enter quantity you would like to order: ")) 
+                input("Enter Item Number of food item you would like to add: "))
+            quantity = int(input("Enter quantity you would like to order: "))
             menu = restdict[restchoice]
         for items in menu:
             if items[0] == restdict[restchoice][foodchoice - 1][0]:
@@ -320,7 +334,7 @@ def addtocart(restdict):
                 price = itemprice
         for i in restdict:
             for j in range(len(restdict[restchoice])):
-                if i == restchoice and restdict[restchoice][foodchoice-1][0] not in list(cart.keys()):
+                if i == restchoice and restdict[restchoice][foodchoice - 1][0] not in list(cart.keys()):
                     cart[restdict[i][foodchoice - 1][0]] = (restchoice, price, quantity)
                     break
                 elif i == restchoice and restdict[restchoice][j][0] in list(cart.keys()):
@@ -332,7 +346,8 @@ def addtocart(restdict):
             break
     return cart
 
-#TO DISPLAY THE BILL BASED ON THE CART OF THE USER
+
+# TO DISPLAY THE BILL BASED ON THE CART OF THE USER
 def viewcart(cart):
     from math import ceil
     order = [["S.No", "Item", "Quantity", "Price"]]
@@ -348,12 +363,14 @@ def viewcart(cart):
     print("Total = Rs.", total)
     print("GST = 18%")
     print("Grand Total = Rs.", ceil(total + total * 0.18), )
-    phstr = str(phoneno) +'.dat'
+    phstr = str(phoneno) + '.dat'
     time = dt.datetime.now()
-    f = open(phstr,'ab')
-    pickle.dump([phoneno,time,restchoice,order],f)
+    f = open(phstr, 'ab')
+    pickle.dump([phoneno, time, restchoice, order], f)
     f.close()
 
+
+#FUNCTION TO FETCH NUMBER OF RATINGS A RESTAURANT HAS
 def ratingscreate():
     ratingslist = []
     for i in restdict:
@@ -372,7 +389,8 @@ def ratingscreate():
             no_ratings.append(i[-1])
     return no_ratings
 
-#TO CREATE A FILE WITH THE AVERAGE RATING OF EACH RESTAURANT
+
+# TO CREATE A FILE WITH THE AVERAGE RATING OF EACH RESTAURANT
 def ratingavgcreate():
     ratingavglist = []
     for i in restdict:
@@ -384,9 +402,10 @@ def ratingavgcreate():
         w.writerow(i)
     rateavgfile.close()
 
-#TO CREATE A FILE WITH THE RATING OF EACH RESTAURANT
+
+# TO CREATE A FILE WITH THE RATING OF EACH RESTAURANT
 def rating():
-    l1 = list(cart.values()) 
+    l1 = list(cart.values())
     restname = l1[0][0]
     print("Thank You for making a purchase from", restname)
     yorn = input("Would you like to add a rating for the following restaurant(Y/N)?")
@@ -396,11 +415,11 @@ def rating():
             if float(rating) >= 0 and float(rating) <= 5:
                 print("Your Feedback has been recorded!")
                 ratefile = open("rating.csv",
-                                "r") 
+                                "r")
                 r = csv.reader(ratefile)
                 ratings = list(r)
                 ratefile.close()
-                for i in ratings: 
+                for i in ratings:
                     if i != []:
                         if i[0] == restname:
                             oldratings = i[1]
@@ -419,65 +438,65 @@ def rating():
             print("Enjoy your food!")
             break
 
-#TO UPDATE THE FILE BASED ON THE RATING PROVIDED BY THE USER
+
+# TO UPDATE THE FILE BASED ON THE RATING PROVIDED BY THE USER
 def ratingsavg():
     ratefile = open("rating.csv", "r")
     allrates = csv.reader(ratefile)
     allrates = list(allrates)
-    ratefile.close() 
+    ratefile.close()
     rateavgfile = open("rateavg.csv",
-                       "r") 
+                       "r")
     r = csv.reader(rateavgfile)
     ratings = list(r)
     ratefile.close()
     rateavgfile = open("rateavg.csv", "w")
     w2 = csv.writer(rateavgfile)
-    for i in allrates: 
+    for i in allrates:
         if i != []:
             try:
                 values = i[1].split(';')
                 for j in range(len(values)):
                     if values[j] != '':
-                        values[j] = float(values[j]) 
+                        values[j] = float(values[j])
                     elif values[j] == '':
                         values.remove('')
-                rateavg = sum(values)/len(values)
+                rateavg = sum(values) / len(values)
                 l1 = [i[0], rateavg, len(values)]
                 w2.writerow(l1)
             except:
-                w2.writerow([i[0], 0,0])
+                w2.writerow([i[0], 0, 0])
 
-#TO DISPLAY A MENU TO ASK THE USER WHAT THEY WANT TO DO
+
+# TO DISPLAY A MENU TO ASK THE USER WHAT THEY WANT TO DO
 def menu():
-    userchoice = int(input('''What would you like to do today?
+    print('''What would you like to do today?
         1. Check user info
         2. Order food
-        3.Exit:'''))
+        3.Exit:''')
+    userchoice = int(input(“Enter what you would like to do : “)) 
     if userchoice == 1:
         viewinfo()
         menu()
     elif userchoice == 2:
         global restdict
-        restdict = getdata()  
+        restdict = getdata()
         global averrest
         averrest = averrestau(restdict)
         global cart
-        cart = addtocart(restdict)  
-        viewcart(cart)  
+        cart = addtocart(restdict)
+        viewcart(cart)
         ratefile = open("rating.csv", "r")
         ratelist = csv.reader(ratefile)
         ratelist = list(ratelist)
-        if ratelist == []:  
+        if ratelist == []:
             ratingscreate()
-        rating()  
+        rating()
         ratingavgcreate()
         ratingsavg()
     elif choice == 3:
         print("Thank You, Have a nice day!")
-        
+
+
 entersite()
-menu()
-
-
-
-
+menu() 
