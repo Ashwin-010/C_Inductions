@@ -1,4 +1,4 @@
-![image](https://user-images.githubusercontent.com/109609514/206912984-befae0c4-7d61-4da2-a5a3-e5c64b10b712.png)
+![Fast Eats-1](https://user-images.githubusercontent.com/109636159/207867264-dbe1fa92-64ec-4067-8fc0-318e76091978.png)
 
 # Fast Eats - A Restaurant Management System
 
@@ -10,3 +10,4 @@ Fast Eats is a school project which focuses on making a system for food delivery
 2. Sort the list of restaurants based on rating, average price, name
 3. View previous orders based on the account
 4. Add Ratings for each restaurant
+
